@@ -2,6 +2,7 @@ package main
 
 import (
 	"aoop_lab1/cmd/lab2/db"
+	"aoop_lab1/cmd/lab2/internal"
 	"context"
 	"github.com/jackc/pgx/v5"
 	"log"
@@ -18,7 +19,7 @@ func main() {
 	defer conn.Close(ctx)
 
 	queries := db.New(conn)
-	handler := NewHandler(ctx, queries)
+	handler := internal.NewHandler(ctx, queries)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/projects/{projectId}", handler.GetProject)

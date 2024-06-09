@@ -2,6 +2,7 @@ package main
 
 import (
 	"aoop_lab1/cmd/lab2/db"
+	"aoop_lab1/cmd/lab3/internal"
 	"context"
 	"github.com/jackc/pgx/v5"
 	"log"
@@ -19,7 +20,7 @@ func main() {
 	defer conn.Close(ctx)
 
 	queries := db.New(conn)
-	handler := NewHandler(ctx, queries)
+	handler := internal.NewHandler(ctx, queries)
 
 	mux := http.NewServeMux()
 
@@ -27,16 +28,16 @@ func main() {
 	if _, err := os.Stat(staticPath); err != nil {
 		panic(err)
 	}
+	auth := internal.Auth{}
 	mux.Handle("/", http.FileServer(http.Dir(staticPath)))
+	mux.HandleFunc("POST /api/login", auth.Login)
 
-	mux.HandleFunc("POST /api/login", Auth)
-
-	HandleFuncAuth(mux, "GET /api/projects/{projectId}", handler.GetProject)
-	HandleFuncAuth(mux, "GET /api/projects/page/{page}/size/{size}/sort/{sort}", handler.GetProjects)
-	HandleFuncAuth(mux, "GET /api/projects/name/{name}/page/{page}/size/{size}/sort/{sort}", handler.GetProjectsByName)
-	HandleFuncAuth(mux, "POST /api/projects", handler.CreateProject)
-	HandleFuncAuth(mux, "PUT /api/projects/{projectId}", handler.UpdateProject)
-	HandleFuncAuth(mux, "DELETE /api/projects/{projectId}", handler.DeleteProject)
+	auth.HandleFuncAuth(mux, "GET /api/projects/{projectId}", handler.GetProject)
+	auth.HandleFuncAuth(mux, "GET /api/projects/page/{page}/size/{size}/sort/{sort}", handler.GetProjects)
+	auth.HandleFuncAuth(mux, "GET /api/projects/name/{name}/page/{page}/size/{size}/sort/{sort}", handler.GetProjectsByName)
+	auth.HandleFuncAuth(mux, "POST /api/projects", handler.CreateProject)
+	auth.HandleFuncAuth(mux, "PUT /api/projects/{projectId}", handler.UpdateProject)
+	auth.HandleFuncAuth(mux, "DELETE /api/projects/{projectId}", handler.DeleteProject)
 
 	log.Println("http://localhost:3000")
 	log.Fatal(http.ListenAndServe(":3000", mux))

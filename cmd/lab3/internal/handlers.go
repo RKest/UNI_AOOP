@@ -1,4 +1,4 @@
-package main
+package internal
 
 import (
 	"aoop_lab1/cmd/lab2/db"
